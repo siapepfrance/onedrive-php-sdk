@@ -49,13 +49,19 @@ class Client
      * @var string
      *      The base URL for authorization requests.
      */
-    const AUTH_URL = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize';
+    const AUTH_URL = 'https://login.microsoftonline.com/%s/oauth2/v2.0/authorize';
 
     /**
      * @var string
      *      The base URL for token requests.
      */
-    const TOKEN_URL = 'https://login.microsoftonline.com/common/oauth2/v2.0/token';
+    const TOKEN_URL = 'https://login.microsoftonline.com/%s/oauth2/v2.0/token';
+
+    /**
+     * @var string
+     *      The base URL for token requests.
+     */
+    private $tenant = 'common';
 
     /**
      * @var string
@@ -194,6 +200,11 @@ class Client
         if ($this->state->token !== null) {
             $this->graph->setAccessToken($this->state->token->data->access_token);
         }
+
+        if (array_key_exists('tenant', $options)) {
+            $this->tenant = $options['tenant'];
+        }
+
     }
 
     /**
@@ -277,7 +288,7 @@ class Client
         // redirected to the redirect URI, with a code passed in the query
         // string (the name of the variable is "code"). This is suitable for
         // PHP.
-        return self::AUTH_URL . "?$query";
+        return sprintf(self::AUTH_URL, $this->tenant) . "?$query";
     }
 
     /**
@@ -366,7 +377,7 @@ class Client
         ];
 
         $response = $this->httpClient->post(
-            self::TOKEN_URL,
+            sprintf(self::TOKEN_URL, $this->tenant),
             ['form_params' => $values]
         );
 
@@ -416,7 +427,7 @@ class Client
         ];
 
         $response = $this->httpClient->post(
-            self::TOKEN_URL,
+            sprintf(self::TOKEN_URL, $this->tenant),
             ['form_params' => $values]
         );
 
